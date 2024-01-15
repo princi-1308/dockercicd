@@ -76,14 +76,25 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+    - name: before
+      env:  
+           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+         command -v ssh-agent >/dev/null || ( apt add --update openssh )' 
+         eval $(ssh-agent -s)
+         echo "$SSH_PRIVATE_KEY" | ssh-add -
+         mkdir -p ~/.ssh
+         chmod 700 ~/.ssh
+         ssh-keyscan $SERVER_ADDRESS >> ~/.ssh/known_hosts
+         chmod 644 ~/.ssh/known_hosts
 
-    - name: Deploy
+    - name: Deploy 
       env:
           # add ssh-private-key to env variable
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |   
-         
+  
           echo "$SSH_PRIVATE_KEY" > ssh_private_key && chmod 600 ssh_private_key
           ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} '
           aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID &&
