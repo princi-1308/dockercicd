@@ -81,12 +81,13 @@ jobs:
       env:
           # add ssh-private-key to env variable
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
           aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID
               aws configure set aws_secret_access_key > echo $AWS_SECRET_ACCESS_KEY
               aws configure set default.region > echo $AWS_REGION
               aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 530750179851.dkr.ecr.ap-south-1.amazonaws.com
-             # sudo docker rm -f `sudo docker ps -q` 
+              #sudo docker rm -f `sudo docker ps -q` 
               sudo docker run -d -p 8080:80 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             host: ${{ secrets.SERVER_ADDRESS }}
             username:  ${{ secrets.SERVER_USER }}
