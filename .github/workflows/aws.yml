@@ -88,7 +88,7 @@ jobs:
               aws configure set default.region > echo $AWS_REGION
               aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 530750179851.dkr.ecr.ap-south-1.amazonaws.com
               #sudo docker rm -f `sudo docker ps -q` 
-              sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              sudo docker pull 530750179851.dkr.ecr.ap-south-1.amazonaws.com/readrly:readrly
               sudo docker run -d -p 8080:80 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             host: ${{ secrets.SERVER_ADDRESS }}
             username:  ${{ secrets.SERVER_USER }}
