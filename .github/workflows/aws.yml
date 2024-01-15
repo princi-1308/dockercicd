@@ -76,22 +76,22 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-     #   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-      #  echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-    #- name: Deploy
-      #env:
-          # add ssh-private-key to env variable
-       #   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      #run: |
-          # Copy ssh private key to the file with permissions
-      #    echo "$SSH_PRIVATE_KEY" > ssh_private_key && chmod 600 ssh_private_key
-         
-          # Create application folder on ec2 and copy nginx directory into it
-          #scp -i ssh_private_key -r nginx ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }}:application
 
-          # Copy deploy.sh file in the application folder inside the EC2 instance,
-     #      ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} 'cat > ./application/deploy.sh'
-          
-          # Copy docker-compose to EC2, configure envrinment variabes and run deploy.sh
-    #      cat docker-compose.yaml | ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} sudo PUBLISH_PORT=${{secrets.PUBLISH_PORT}} 'bash -c "cd application && cat > docker-compose.yaml && chmod -R 755 ./deploy.sh && ./deploy.sh && cd .. && rm -rf application"'
+    - name: Deploy
+      env:
+          # add ssh-private-key to env variable
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+          aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID
+              aws configure set aws_secret_access_key > echo $AWS_SECRET_ACCESS_KEY
+              aws configure set default.region > echo $AWS_REGION
+              aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 530750179851.dkr.ecr.ap-south-1.amazonaws.com
+              sudo docker rm -f `sudo docker ps -q` 
+              sudo docker run -d -p 8080:80 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            host: ${{ secrets.SERVER_ADDRESS }}
+            username:  ${{ secrets.SERVER_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            port: 22
+            envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG h        
+      
     
