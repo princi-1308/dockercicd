@@ -85,7 +85,7 @@ jobs:
          echo "$SSH_PRIVATE_KEY" | ssh-add -
          mkdir -p ~/.ssh
          chmod 700 ~/.ssh
-         echo $SERVER_ADDRESS >> ~/.ssh/known_hosts
+         ssh-keyscan $SERVER_ADDRESS >> ~/.ssh/known_hosts
          chmod 644 ~/.ssh/known_hosts
 
     - name: Deploy 
