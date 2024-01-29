@@ -76,39 +76,16 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-    - name: before
-      env:  
-           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      run: |
-         command -v ssh-agent >/dev/null || ( apt add --update openssh )
-         eval $(ssh-agent -s)
-         echo "$SSH_PRIVATE_KEY" | ssh-add -
-         mkdir -p ~/.ssh
-         chmod 700 ~/.ssh
-         ssh-keyscan $SERVER_ADDRESS >> ~/.ssh/known_hosts
-         chmod 644 ~/.ssh/known_hosts
-
-    - name: Deploy 
+        
+    - name: Deploy to EC2
       env:
-          # add ssh-private-key to env variable
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      run: |   
-  
-          echo "$SSH_PRIVATE_KEY" > ssh_private_key && chmod 600 ssh_private_key
-          ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} '
-          aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID &&
-              aws configure set aws_secret_access_key > echo $AWS_SECRET_ACCESS_KEY &&
-              aws configure set default.region > echo $AWS_REGION '
-            ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} 'aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 530750179851.dkr.ecr.ap-south-1.amazonaws.com'
-              #sudo docker rm -f `sudo docker ps -q` 
-              ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} 'sudo docker pull 530750179851.dkr.ecr.ap-south-1.amazonaws.com/readrly:readrly'
-                ssh -i ssh_private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_ADDRESS }} 'sudo docker run -d -p 8080:80 530750179851.dkr.ecr.ap-south-1.amazonaws.com/readrly:readrly'
-            #host: ${{ secrets.SERVER_ADDRESS }}
-            #username:  ${{ secrets.SERVER_USER }}
-            #key: ${{ secrets.SSH_PRIVATE_KEY }}
-           # port: 22
-           #
-           #envs: AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG h        
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{secrets.SERVER_ADDRESS}}
+            USER_NAME: ${{secrets.SERVER_USER}}
       
+      run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 
+
+              
     
