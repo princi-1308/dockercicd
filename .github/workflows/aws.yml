@@ -89,3 +89,4 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'sudo docker pull 530750179851.dkr.ecr.ap-south-1.amazonaws.com/readrly:readrly'
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'sudo docker rm -f readrly'
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'sudo docker run -d -p 80:80  --name readrly 530750179851.dkr.ecr.ap-south-1.amazonaws.com/readrly:readrly'
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'sudo docker rmi $(docker images --filter "dangling=true" -q --no-trunc)'
