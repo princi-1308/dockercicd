@@ -29,7 +29,7 @@ name: Build and Deploy to EC2
 on:
   push:
     branches:
-      - production
+      - main
       - staging
       - development
 
